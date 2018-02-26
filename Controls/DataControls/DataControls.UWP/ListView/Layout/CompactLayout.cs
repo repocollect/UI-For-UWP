@@ -514,6 +514,25 @@ namespace Telerik.Data.Core.Layouts
             return null;
         }
 
+        internal override double PhysicalOffsetFromSlot(int slot)
+        {
+            var physicalOffset = this.RenderInfo.OffsetFromIndex(slot);
+            var collapsedRanges = this.collapsedSlotsTable.TakeWhile(range => range.UpperBound <= slot);
+
+            foreach (var collapsedRange in collapsedRanges)
+            {
+                var lowerBound = collapsedRange.LowerBound;
+                var upperBound = collapsedRange.UpperBound;
+
+                for (int collapsedSlot = lowerBound; collapsedSlot <= upperBound; collapsedSlot++)
+                {
+                    physicalOffset -= this.RenderInfo.ValueForIndex(collapsedSlot);
+                }
+            }
+
+            return physicalOffset;
+        }
+
         internal override double SlotFromPhysicalOffset(double physicalOffset, bool includeCollapsed = false)
         {
             var logicalOffset = this.RenderInfo.IndexFromOffset(physicalOffset);
